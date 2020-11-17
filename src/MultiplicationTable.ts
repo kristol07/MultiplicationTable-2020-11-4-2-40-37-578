@@ -22,20 +22,40 @@ function getCombination(start: number, end: number): Expression[] {
   return combination
 }
 
-function renderMultiplicationExpression(firstMultiplicator: number, secondMultiplicator: number, start: number, end: number) {
-  const header: string = firstMultiplicator===start ? '' : ' '
-  const tail: string = secondMultiplicator===firstMultiplicator ? '\n' : ' '
+function renderMultiplicationExpression(firstMultiplicator: number, secondMultiplicator: number, start: number) {
+  const header: string = firstMultiplicator === start ? '' : ' '
+  const tail: string = secondMultiplicator === firstMultiplicator ? '\n' : ' '
   return `${header}${firstMultiplicator}*${secondMultiplicator}=${firstMultiplicator * secondMultiplicator}${tail}`
 }
 
 function renderCombinationExpression(start: number, end: number): string[] {
   const combination = getCombination(start, end)
-  const combinationExpression = combination.map(expression => renderMultiplicationExpression(expression.firstMultiplicator, expression.secondMultiplicator, start, end))
+  const combinationExpression = combination.map(
+    expression => renderMultiplicationExpression(expression.firstMultiplicator, expression.secondMultiplicator, start))
   return combinationExpression
 }
 
 function renderMultiplicationTable(combinationExpression: string[]): string {
   return combinationExpression.join('').slice(0, -1)
+}
+
+function adjustTable(table: string): string {
+  const lines: string[] = table.split('\n')
+  const lastLine = lines[lines.length - 1]
+  const standardLength = lastLine?.split('  ').map(expression => expression.length)
+
+  return lines.map(line => {
+    const expressions = line.split('  ')
+    const expressionsLength = line.split('  ').map(expression => expression.length)
+    const diff: number[] = []
+    for (let i = 0; i < expressionsLength.length; i++) {
+      diff.push(standardLength[i] - expressionsLength[i])
+    }
+    for (let i = 0; i < expressions.length; i++) {
+      expressions[i] = expressions[i] + '  ' + ' '.repeat(diff[i])
+    }
+    return expressions.join('').trimEnd()
+  }).join('\n')
 }
 
 export class MultiplicationTable {
@@ -46,6 +66,6 @@ export class MultiplicationTable {
     const combinationExpression = renderCombinationExpression(start, end)
     const multiplicationTable = renderMultiplicationTable(combinationExpression)
 
-    return multiplicationTable
+    return adjustTable(multiplicationTable)
   }
 }
